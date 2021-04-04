@@ -13,11 +13,11 @@ use SPFW\system\routing\Request;
  * ErrorReport2 Client
  *
  * @package ErrorReport2
- * @version 2.0.0
+ * @version 2.0.1
  */
 final class ErrorReport2Client extends AbstractAction
 {
-	private const ER2_VERSION = '2.0.0';
+	private const ER2_VERSION = '2.0.1';
 
 	private const DEFAULT_SERVICE_ID = 'My SPFW App';
 
@@ -277,7 +277,7 @@ final class ErrorReport2Client extends AbstractAction
 		}
 
 		/** @noinspection GlobalVariableUsageInspection */
-		return $this->prepareVariables($_SESSION, $this->session_param_block_list);
+		return $this->prepareVariables($_SESSION ?? [], $this->session_param_block_list);
 	}
 
 	private function prepareThrowableData(\Throwable $throwable) : array
