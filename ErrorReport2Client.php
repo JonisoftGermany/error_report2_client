@@ -4,6 +4,9 @@ namespace ErrorReport2;
 
 use SPFW\module\DB;
 use SPFW\system\config\Config;
+use SPFW\system\config\Environment;
+use SPFW\system\Core;
+use SPFW\system\CoreException;
 use SPFW\system\error\AbstractAction;
 use SPFW\system\error\Error;
 use SPFW\system\routing\Request;
@@ -13,11 +16,12 @@ use SPFW\system\routing\Request;
  * ErrorReport2 Client
  *
  * @package ErrorReport2
- * @version 2.0.1
+ * @version 2.1.0
  */
 final class ErrorReport2Client extends AbstractAction
 {
-	private const ER2_VERSION = '2.0.1';
+	private const ER2_VERSION = '2.1.0';
+	private const ER2_PROTOCOL_VERSION = 2;
 
 	private const DEFAULT_SERVICE_ID = 'My SPFW App';
 
@@ -25,8 +29,6 @@ final class ErrorReport2Client extends AbstractAction
 	private string $server_url;
 	private string $api_token;
 	private string $service_identifier;
-
-	private string $session_id;
 
 	private bool $transmit_cookies = true;
 	private bool $transmit_database_queries = true;
@@ -46,22 +48,20 @@ final class ErrorReport2Client extends AbstractAction
 		$this->server_url = $server_url;
 		$this->api_token = $api_token;
 		$this->service_identifier = $service_identifier;
-
-		$this->session_id = bin2hex(random_bytes(64));
 	}
 
-	public function applyToError(array $errors) : bool
+	public function applyToError(array $errors, ?string $request_hash) : bool
 	{
-		$data = $this->prepareAll();
+		$data = $this->prepareAll($request_hash);
 
 		$data['errors'] = $this->prepareErrorData($errors);
 
 		return $this->send($data);
 	}
 
-	public function applyToThrowable(\Throwable $throwable) : bool
+	public function applyToThrowable(\Throwable $throwable, ?string $request_hash) : bool
 	{
-		$data = $this->prepareAll();
+		$data = $this->prepareAll($request_hash);
 
 		$data['throwable'] = $this->prepareThrowableData($throwable);
 
@@ -134,13 +134,13 @@ final class ErrorReport2Client extends AbstractAction
 		return $this;
 	}
 
-	private function prepareAll() : array
+	private function prepareAll(?string $session_id) : array
 	{
 		$request = Request::current();
 
 		return [
 				'authentication'	=> $this->prepareAuthenticationData(),
-				'general'			=> $this->prepareGeneralData(),
+				'general'			=> $this->prepareGeneralData($session_id),
 				'environment'		=> $this->prepareEnvironmentData(),
 				'request'			=> $this->prepareRequestData($request),
 				'database'			=> $this->prepareDatabaseData(),
@@ -154,9 +154,10 @@ final class ErrorReport2Client extends AbstractAction
 	private function prepareAuthenticationData() : array
 	{
 		return [
-				'token'			=> $this->api_token,
-				'service_id'	=> $this->service_identifier,
-				'er2_version'	=> self::ER2_VERSION
+				'token'					=> $this->api_token,
+				'service_id'			=> $this->service_identifier,
+				'er2_version'			=> self::ER2_VERSION,
+				'er2_protocol_version'	=> self::ER2_PROTOCOL_VERSION
 		];
 	}
 
@@ -217,13 +218,24 @@ final class ErrorReport2Client extends AbstractAction
 		return $data;
 	}
 
-	private function prepareGeneralData() : array
+	/**
+	 * @param null|string $session_id
+	 *
+	 * @return array<string,mixed>
+	 */
+	private function prepareGeneralData(?string $session_id) : array
 	{
-		$global_config = Config::get();
+		try {
+			$global_config = Core::activeInstance()->getEnvironment();
+		} catch (CoreException $e) {
+			$global_config = null;
+		}
+
 		$current_time = new \DateTime();
 
+		/** @noinspection PhpDeprecationInspection */
 		return [
-				'er2_session_id'	=> $this->session_id,
+				'er2_session_id'	=> $session_id ?? 'No session id',
 				'timestamp'			=> $current_time->format('Y-m-d\TH:i:s'),
 				'host_name'			=> php_uname('n'),
 				'host_os'			=> PHP_OS,
@@ -232,7 +244,8 @@ final class ErrorReport2Client extends AbstractAction
 				'php_version'		=> PHP_VERSION,
 				'php_mode'			=> PHP_SAPI,
 				'php_mem_usage'		=> memory_get_usage(),
-				'debug_mode'		=> $global_config !== null ? $global_config->isDebugMode() : null,
+				'environment_name'	=> $global_config instanceof Environment ? \get_class($global_config) : null,
+				'debug_mode'		=> $global_config instanceof Config ? $global_config->isDebugMode() : null,
 		];
 	}
 
@@ -310,7 +323,7 @@ final class ErrorReport2Client extends AbstractAction
 				'http' => [
 					'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
 					'method'  => 'POST',
-					'content' => json_encode($data)
+					'content' => json_encode($data, JSON_THROW_ON_ERROR)
 				]
 		];
 
