@@ -5,8 +5,10 @@ Clients send error and exception logs to an API.
 
 ## Requirements 
 
-* SPFW >=1.0.0 and
+* SPFW >=2.0.0 (since ER2 Client 2.1.x) and
 * PHP >=7.4.
+
+If you are using SPFW 1.x.x check out ER2 Client Version 2.0.x.
 
 ## Installation
 
@@ -18,6 +20,15 @@ __Example:__
 cd src/modules
 git submodule add URL_TO_REPOSITORY
 ```
+
+## Update
+When ER2 is included as git submodule, update the submodule.
+Future updates may change configuration options.
+We try to keep ER2 backward compatible as much as reasonable.
+Please read the release notes carefully for each release!
+
+ER2 uses semantic versioning.
+Breaking changes can be expected at major releases.
 
 ## Configuration
 
