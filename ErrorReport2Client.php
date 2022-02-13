@@ -20,11 +20,13 @@ final class ErrorReport2Client extends AbstractAction
 	private const ER2_VERSION = '2.0.1';
 
 	private const DEFAULT_SERVICE_ID = 'My SPFW App';
+	private const DEFAULT_TIMEOUT_IN_SECONDS = 5;
 
 
 	private string $server_url;
 	private string $api_token;
 	private string $service_identifier;
+	private int $timeout = self::DEFAULT_TIMEOUT_IN_SECONDS;
 
 	private string $session_id;
 
@@ -310,6 +312,7 @@ final class ErrorReport2Client extends AbstractAction
 				'http' => [
 					'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
 					'method'  => 'POST',
+					'timeout' => $this->timeout,
 					'content' => json_encode($data)
 				]
 		];
@@ -317,6 +320,12 @@ final class ErrorReport2Client extends AbstractAction
 		$context  = stream_context_create($options);
 
 		return file_get_contents($this->server_url, false, $context);
+	}
+
+	public function setTimeout(int $timeout_in_seconds) : self
+	{
+		$this->timeout = $timeout_in_seconds;
+		return $this;
 	}
 }
 
