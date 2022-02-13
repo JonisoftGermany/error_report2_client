@@ -81,3 +81,16 @@ $er2->disableTransmittingGetParameter();
 $er2->disableTransmittingPostParameter();
 $er2->disableTransmittingSessionVariables();
 ```
+
+#### Server Request Timeout
+
+If server API does not respond, ER2 will continue trying to reach the server.
+PHP's default request timeout is 60 seconds.
+This blocks clients from continuing, e.g. displaying the user a proper error page.
+To limit the waiting time for the user, a shorter timeout than PHP's default timeout is recommended.
+ER2 limits requests to 5 seconds by default.
+
+This example reduces the timeout to 3 seconds:
+
+`` $er2->setTimeout(3); ``
+
