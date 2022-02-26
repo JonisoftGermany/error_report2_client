@@ -245,7 +245,7 @@ final class ErrorReport2Client extends AbstractAction
 				'host_os_version'	=> php_uname('v'),
 				'php_version'		=> PHP_VERSION,
 				'php_mode'			=> PHP_SAPI,
-				'php_mem_usage'		=> memory_get_usage(),
+				'php_mem_usage'		=> memory_get_peak_usage(),
 				'environment_name'	=> $global_config instanceof Environment ? \get_class($global_config) : null,
 				'debug_mode'		=> $global_config instanceof Config ? $global_config->isDebugMode() : null,
 		];
