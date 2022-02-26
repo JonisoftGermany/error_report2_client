@@ -13,11 +13,11 @@ use SPFW\system\routing\Request;
  * ErrorReport2 Client
  *
  * @package ErrorReport2
- * @version 2.0.2
+ * @version 2.0.3
  */
 final class ErrorReport2Client extends AbstractAction
 {
-	private const ER2_VERSION = '2.0.2';
+	private const ER2_VERSION = '2.0.3';
 
 	private const DEFAULT_SERVICE_ID = 'My SPFW App';
 	private const DEFAULT_TIMEOUT_IN_SECONDS = 5;
@@ -233,7 +233,7 @@ final class ErrorReport2Client extends AbstractAction
 				'host_os_version'	=> php_uname('v'),
 				'php_version'		=> PHP_VERSION,
 				'php_mode'			=> PHP_SAPI,
-				'php_mem_usage'		=> memory_get_usage(),
+				'php_mem_usage'		=> memory_get_peak_usage(),
 				'debug_mode'		=> $global_config !== null ? $global_config->isDebugMode() : null,
 		];
 	}
