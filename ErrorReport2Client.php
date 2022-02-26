@@ -16,11 +16,11 @@ use SPFW\system\routing\Request;
  * ErrorReport2 Client
  *
  * @package ErrorReport2
- * @version 2.1.1
+ * @version 2.1.2
  */
 final class ErrorReport2Client extends AbstractAction
 {
-	private const ER2_VERSION = '2.1.1';
+	private const ER2_VERSION = '2.1.2';
 	private const ER2_PROTOCOL_VERSION = 2;
 
 	private const DEFAULT_SERVICE_ID = 'My SPFW App';
