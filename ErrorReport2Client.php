@@ -233,7 +233,7 @@ final class ErrorReport2Client extends AbstractAction
 				'host_os_version'	=> php_uname('v'),
 				'php_version'		=> PHP_VERSION,
 				'php_mode'			=> PHP_SAPI,
-				'php_mem_usage'		=> memory_get_usage(),
+				'php_mem_usage'		=> memory_get_peak_usage(),
 				'debug_mode'		=> $global_config !== null ? $global_config->isDebugMode() : null,
 		];
 	}
